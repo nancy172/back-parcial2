@@ -20,7 +20,8 @@ const userSchema = new Schema({
     type: String,
     enum: ['cuidador', 'adoptante'],
     required: true
-  }
+  },
+  password: String
 });
 
 const User = mongoose.model('users', userSchema);
