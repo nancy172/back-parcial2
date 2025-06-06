@@ -1,0 +1,49 @@
+.bg-primary {
+    background-color: #ff9a34 !important;
+}
+  
+.navbar-custom .navbar-brand,
+.navbar-custom .nav-link {
+    color: white;
+}
+  
+.navbar-custom .nav-link:hover {
+    color: #ffe0b2;
+} 
+
+section.bg-light {
+    min-height: 500px;
+    display: flex;
+    align-items: center;
+}
+
+.intro-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 1.5em;
+}
+
+.card-header {
+    font-size: 1.1rem;
+}
+
+.bg-put{
+    background-color: rgb(55, 142, 255);
+}
+.border-put{
+    border-color: rgb(55, 142, 255);
+}
+
+.bg-footer {
+    background-color: #333333;
+    
+}
+  
+
+@media (min-width: 768px) {
+    .intro-img {
+      max-width: 450px;
+    }
+}
+  
