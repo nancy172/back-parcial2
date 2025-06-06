@@ -2,6 +2,7 @@ import express from "express";
 import chalk from "chalk";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
+import cors from "cors";
 dotenv.config();
 
 const port = process.env.PORT;
@@ -22,6 +23,7 @@ db.once( 'open', () => {console.log("Conexión con la base de datos.")});
 // Middlewares
 app.use(express.json());
 app.use(express.static('public'));
+app.use(cors());
 
 // Se llaman a las rutas
 routerApi(app);
