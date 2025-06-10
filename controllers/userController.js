@@ -55,12 +55,15 @@ const validatePhone = async (phone, isUpdate = false) => {
 
     if (isUpdate && phone === undefined) return;
 
-    if (typeof phone !== 'number') {
-        throw new Error('ERROR: El número de teléfono debe ser un número.');
+    if (!phone || typeof phone !== 'string' || phone.trim() === '') {
+        throw new Error("ERROR: El número de teléfono debe ser un texto y no puede quedar vacío.");
     }
 
+    // Limpiar el teléfono de espacios y caracteres especiales
+    const cleanPhone = phone.replace(/\D/g, ''); // Quita todo lo que no sea dígito
+
     const phoneRegex = /^\d{10}$/;
-    if (!phoneRegex.test(phone)) {
+    if (!phoneRegex.test(cleanPhone)) {
         throw new Error('ERROR: El número de teléfono es inválido. Debe tener 10 dígitos.');
     }
 
