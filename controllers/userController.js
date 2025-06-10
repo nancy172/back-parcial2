@@ -1,4 +1,43 @@
 import User from "../models/UserModel.js";
+import bcrypt from "bcrypt";
+import jsonwebtoken from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config();
+
+const secret_key = process.env.SECRET_KEY;
+const salt = 10;
+
+// Autenticación
+const auth = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({email: email});
+
+        if(!user){
+            return res.status(401).json({msg: "El usuario no existe"});
+        }
+        
+        const passValid = await bcrypt.compare(password, user.password);
+
+        if(!passValid){
+            res.status(404).json({msg: "La contraseña es inválida"});
+        }
+
+        const data = {
+            id: user._id,
+            email: user.email
+        }
+
+        // Se genera el token
+        const jwt = jsonwebtoken.sign( data, secret_key, { expiresIn: '1h'} );
+
+        res.status(201).json({msg: "Autenticación exitosa", token: jwt});
+
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+    
+};
 
 // Validaciones
 const validateName = async (name, isUpdate = false) => {
@@ -89,7 +128,7 @@ const addUser = async (req, res) => {
     const user = req.body;
 
     // Se verifica los parámetros completos
-    if(!user.name || !user.email ||!user.phone){
+    if(!user.name || !user.email ||!user.phone || !user.password){
         return res.status(400).json({msg: "ERROR: Faltan completar parámetros."});
     }
 
@@ -99,9 +138,13 @@ const addUser = async (req, res) => {
         await validatePhone(user.phone);
         await validateRole(user.role);
 
+        const passwordHash = await bcrypt.hash(user.password, salt);
+        user.password = passwordHash;
+
         const doc = new User(user);
         await doc.save();
-        res.status(201).json( {msg: "El usuario fue creado con éxito.", data: {id: doc._id, name: doc.name, email: doc.email, phone: doc.phone}} );
+        res.status(201).json( {msg: "El usuario fue creado con éxito.", data: {id: doc._id, name: doc.name, email: doc.email, phone: doc.phone, password: doc.password}} );
+        // Enviar solo el id y el nombre
 
     } catch (error) {
         res.status(400).json({msg: error.message});
@@ -161,4 +204,4 @@ const updateUser = async (req, res) => {
 
 };
 
-export {getUsers, getUserById, addUser, deleteUser, updateUser};
+export {getUsers, getUserById, addUser, deleteUser, updateUser, auth};
