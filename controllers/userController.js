@@ -14,7 +14,7 @@ const auth = async (req, res) => {
         const user = await User.findOne({email: email});
 
         if(!user){
-            return res.status(401).json({msg: "El usuario no existe"});
+            res.status(401).json({msg: "El usuario no existe"});
         }
         
         const passValid = await bcrypt.compare(password, user.password);
@@ -143,8 +143,7 @@ const addUser = async (req, res) => {
 
         const doc = new User(user);
         await doc.save();
-        res.status(201).json( {msg: "El usuario fue creado con éxito.", data: {id: doc._id, name: doc.name, email: doc.email, phone: doc.phone, password: doc.password}} );
-        // Enviar solo el id y el nombre
+        res.status(201).json( {msg: "El usuario fue creado con éxito.", data: {id: doc._id, name: doc.name}} );
 
     } catch (error) {
         res.status(400).json({msg: error.message});
