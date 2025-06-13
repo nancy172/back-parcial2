@@ -25,10 +25,27 @@ const petSchema = new Schema({
         type: String, 
         required: true 
     },
-    caretaker: { 
-        type: String, 
-        required: true 
+    image: String,
+    status: {
+        type: String,
+        enum: ['disponible', 'adoptado'],
+        default: 'disponible'
     }
+    // Cuidador - solo uno será usado
+    /*caretakerPersonId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Person'
+    },
+    caretakerRefugeId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Refuge'
+    },
+    adopterId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Person'
+    },*/
+    
+
 });
 
 const Pet = mongoose.model('pets', petSchema);

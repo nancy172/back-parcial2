@@ -10,18 +10,27 @@ const userSchema = new Schema({
   email: {
     type: String,
     unique: true,
+    lowercase: true,
     required: true
   },
-  phone: {
+  password: {
     type: String,
-    required: false
-  },
-  role: {
-    type: String,
-    enum: ['cuidador', 'adoptante'],
     required: true
   },
-  password: String
+  userType: {
+    type: String,
+    enum: ['persona', 'refugio', 'admin'],
+    required: true
+  },
+  // Referencias directas, solo una será usada
+  /*personId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Person'
+  },
+  refugeId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Refuge'
+  },*/
 });
 
 const User = mongoose.model('users', userSchema);
