@@ -3,6 +3,10 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
+    userId: { 
+        type: Schema.Types.ObjectId, 
+        ref: 'User' 
+    },
     name: {
         type: String,
         required: true
@@ -12,10 +16,6 @@ const userSchema = new Schema({
         required: true
     },
     address: {
-        type: String,
-        required: true
-    },
-    city: {
         type: String,
         required: true
     }

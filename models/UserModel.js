@@ -17,20 +17,11 @@ const userSchema = new Schema({
     type: String,
     required: true
   },
-  userType: {
+  role: {
     type: String,
     enum: ['persona', 'refugio', 'admin'],
     required: true
-  },
-  // Referencias directas, solo una será usada
-  /*personId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Person'
-  },
-  refugeId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Refuge'
-  },*/
+  }
 });
 
 const User = mongoose.model('users', userSchema);

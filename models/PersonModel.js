@@ -3,11 +3,19 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
+    userId: { 
+        type: Schema.Types.ObjectId, 
+        ref: 'User' 
+    },
     firstName: {
         type: String,
         required: true
     },
     lastName: {
+        type: String,
+        required: true
+    },
+    dni: {
         type: String,
         required: true
     },
@@ -19,15 +27,11 @@ const userSchema = new Schema({
         type: String,
         required: true
     },
-    city: {
-        type: String,
-        required: true
-    },
     canAdopt: {
         type: Boolean,
         default: true
     },
-    canCaretake: {
+    canGiveForAdoption: {
         type: Boolean,
         default: false
     }
