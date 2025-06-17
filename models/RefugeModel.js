@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
 
-const userSchema = new Schema({
+const refugeSchema = new Schema({
     userId: { 
         type: Schema.Types.ObjectId, 
         ref: 'User' 
@@ -21,6 +21,6 @@ const userSchema = new Schema({
     }
 });
 
-const Refuge = mongoose.model('refuges', userSchema);
+const Refuge = mongoose.model('refuges', refugeSchema);
 
 export default Refuge;

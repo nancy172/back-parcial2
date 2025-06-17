@@ -51,28 +51,6 @@ const validateName = async (name, isUpdate = false) => {
     }
 };
 
-const validatePhone = async (phone, isUpdate = false) => {
-
-    if (isUpdate && phone === undefined) return;
-
-    if (!phone || typeof phone !== 'string' || phone.trim() === '') {
-        throw new Error("ERROR: El número de teléfono debe ser un texto y no puede quedar vacío.");
-    }
-
-    // Limpiar el teléfono de espacios y caracteres especiales
-    const cleanPhone = phone.replace(/\D/g, ''); // Quita todo lo que no sea dígito
-
-    const phoneRegex = /^\d{10}$/;
-    if (!phoneRegex.test(cleanPhone)) {
-        throw new Error('ERROR: El número de teléfono es inválido. Debe tener 10 dígitos.');
-    }
-
-    const phoneExists = await User.findOne({ phone });
-    if (phoneExists) {
-        throw new Error('ERROR: El número de teléfono ya está registrado.');
-    }
-};
-
 const validateEmail = async (email, userId = null, isUpdate = false) => { 
 
     if (isUpdate && email === undefined) return;
@@ -92,10 +70,10 @@ const validateRole = async (role, isUpdate = false) => {
 
     if (isUpdate && role === undefined) return;
 
-    const okRoles = ['cuidador', 'adoptante'];
+    const okRoles = ['persona', 'refugio', 'admin'];
 
     if (!role || typeof role !== 'string' || !okRoles.includes(role.toLowerCase())) {
-        throw new Error("ERROR: El rol del usuario debe ser 'cuidador' o 'adoptante'.");
+        throw new Error("ERROR: El rol del usuario debe ser 'persona' o 'refugio' o 'admin'.");
     }
     
 };
@@ -131,14 +109,13 @@ const addUser = async (req, res) => {
     const user = req.body;
 
     // Se verifica los parámetros completos
-    if(!user.name || !user.email ||!user.phone || !user.password){
+    if(!user.name || !user.email || !user.password){
         return res.status(400).json({msg: "ERROR: Faltan completar parámetros."});
     }
 
     try {
         await validateName(user.name);
         await validateEmail(user.email);
-        await validatePhone(user.phone);
         await validateRole(user.role);
 
         const passwordHash = await bcrypt.hash(user.password, salt);
@@ -187,10 +164,6 @@ const updateUser = async (req, res) => {
 
         if (user.email !== undefined) {
             await validateEmail(user.email, id, true);
-        }
-
-        if (user.phone !== undefined) {
-            await validatePhone(user.phone, true);
         }
 
         if (user.role !== undefined) {

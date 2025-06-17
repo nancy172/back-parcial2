@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
 
-const userSchema = new Schema({
+const personSchema = new Schema({
     userId: { 
         type: Schema.Types.ObjectId, 
         ref: 'User' 
@@ -37,6 +37,6 @@ const userSchema = new Schema({
     }
 });
 
-const Person = mongoose.model('persons', userSchema);
+const Person = mongoose.model('persons', personSchema);
 
 export default Person;
