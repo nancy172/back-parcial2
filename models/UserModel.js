@@ -21,6 +21,9 @@ const userSchema = new Schema({
     type: String,
     enum: ['persona', 'refugio', 'admin'],
     required: true
+  },
+  avatar: {
+    String
   }
 });
 
