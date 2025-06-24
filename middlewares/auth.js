@@ -22,7 +22,7 @@ const validateToken = (req, res, next) => {
     // Se verifica y se decodifica el token
     jsonwebtoken.verify(token, secret_key, ( error, decoded ) => {
         if(error){
-            res.status(403).json({msg: "Token inválido o expirado"});
+            return res.status(403).json({msg: "Token inválido o expirado"});
         }
 
         // Se verifica si el token decodificado contiene el ID del usuario
@@ -30,12 +30,15 @@ const validateToken = (req, res, next) => {
             return res.status(403).json({ msg: "Token mal formado" });
         }
 
-        console.log( {decoded} );
-        req.userId = decoded.id;
-        //req.body.userId = decoded.id;
-    })
+        req.user = {
+            id: decoded.id,
+            role: decoded.role
+        };
 
-    next();
+        next();
+
+    });
+
 }
 
 

@@ -1,8 +1,14 @@
 import Pet from "../models/PetModel.js";
+import mongoose from "mongoose";
+import { deleteFile } from "../utils/fileUtils.js";
 
 // Validaciones
 const validatePetAge = (age) => {
     const okUnits = ['días', 'meses', 'años'];
+
+    if (!age || typeof age !== 'object') {
+        throw new Error("ERROR: El campo edad es obligatorio y debe tener una estructura válida.");
+    }
 
     if (age.value <= 0 || typeof age.value !== 'number') {
         throw new Error("ERROR: La edad debe ser un número mayor a 0.");
@@ -13,9 +19,16 @@ const validatePetAge = (age) => {
     }
 };
 
+const validateObjectId = (id, label) => {
+    if (id && !mongoose.Types.ObjectId.isValid(id)) {
+        throw new Error(`ERROR: El ID de ${label} no es válido.`);
+    }
+};
+
 const validatePet = (pet, isUpdate = false) => {
     const okTypes = ['perro', 'gato', 'conejo', 'otro'];
     const okSexes = ['macho', 'hembra'];
+    const okStatus = ['disponible', 'adoptado'];
 
     if(!isUpdate || pet.name !== undefined){
         if (!pet.name || typeof pet.name !== 'string' ||  pet.name.trim() === '') {
@@ -43,12 +56,37 @@ const validatePet = (pet, isUpdate = false) => {
         if (!pet.description || typeof pet.description !== 'string' ||  pet.description.trim() === '') {
             throw new Error("ERROR: La descripción de la mascota debe ser un texto y no puede quedar vacío.");
         }
-    } 
+    }
 
-    if(!isUpdate || pet.caretaker !== undefined){
-        if (!pet.caretaker || typeof pet.caretaker !== 'string' ||  pet.caretaker.trim() === '') {
-            throw new Error("ERROR: El nombre del cuidador debe ser un texto y no puede quedar vacío.");
+    if (!isUpdate || pet.images !== undefined) {
+        if (!Array.isArray(pet.images) || pet.images.length === 0) {
+            throw new Error("ERROR: Debe subir al menos una imagen.");
         }
+        pet.images.forEach((img, i) => {
+            if (typeof img !== 'string' || img.trim() === '') {
+                throw new Error(`ERROR: La imagen en la posición ${i} no es válida.`);
+            }
+        });
+    }
+
+    // Validar cuidador
+    const { caretakerPersonId, caretakerRefugeId, adopterId } = pet;
+
+    if ((caretakerPersonId && caretakerRefugeId) || (!caretakerPersonId && !caretakerRefugeId)) {
+        throw new Error("ERROR: Debe asignarse un solo cuidador: persona o refugio.");
+    }
+
+    validateObjectId(caretakerPersonId, "cuidador (persona)");
+    validateObjectId(caretakerRefugeId, "cuidador (refugio)");
+
+    // Validar adopterId si existe
+    if (adopterId) {
+        validateObjectId(adopterId, "adoptante");
+    }
+
+    // Si el estado es "adoptado", debe haber un adopterId
+    if (pet.status === 'adoptado' && !adopterId) {
+        throw new Error("ERROR: Si la mascota fue adoptada, debe indicarse el adoptante.");
     }
 
 };
@@ -82,14 +120,17 @@ const getPetById = async (req, res) => {
 
 const addPet = async (req, res) => {
     const pet = req.body;
-
-    // Se verifica los parámetros completos
-    if(!pet.name || !pet.type ||!pet.age ||!pet.sex ||!pet.description ||!pet.caretaker){
-        return res.status(400).json({msg: "ERROR: Faltan completar parámetros."});
-    }
+    const files = req.files;
 
     try {
-        validatePet(pet);
+        // Guardar rutas de imágenes subidas si hay
+        if (files && files.length > 0) {
+            pet.images = files.map(file => file.path);
+        } else {
+            pet.images = [];
+        }
+
+        validatePet(pet);        
 
         const doc = new Pet(pet);
         await doc.save();
@@ -97,6 +138,9 @@ const addPet = async (req, res) => {
         res.status(201).json( {msg: "La mascota fue creada con éxito.", data: doc});   
 
     } catch (error) {
+        if (files && files.length > 0) {
+            files.forEach(file => { deleteFile(file.path)});
+        }
         res.status(400).json({msg: error.message});
     }
     
@@ -105,15 +149,20 @@ const addPet = async (req, res) => {
 const deletePet = async (req, res) => {
     const id = req.params.id;
     try {
-        const status = await Pet.findByIdAndDelete(id);
-        if (status) {
-            res.json( {msg: 'La mascota fue eliminada con éxito.'} );
-        } else {
-            res.status(404).json({msg: 'ERROR: No se encontró la mascota.'});
+        const pet = await Pet.findById(id);
+        if (!pet) {
+            return res.status(404).json({msg: 'ERROR: No se encontró la mascota.'});
         }
 
+        if (pet.images && pet.images.length > 0) {
+            pet.images.forEach(imgPath => deleteFile(imgPath));
+        }
+
+        await Pet.findByIdAndDelete(id);
+        return res.json( {msg: 'La mascota fue eliminada con éxito.'} );
+        
     } catch (error) {
-        res.status(500).json({msg: 'Error en el servidor. No se pudo eliminar la mascota.'});
+        return res.status(500).json({msg: 'Error en el servidor. No se pudo eliminar la mascota.'});
     }
     
 };
@@ -121,22 +170,36 @@ const deletePet = async (req, res) => {
 const updatePet = async (req, res) => {
     const id = req.params.id;
     const pet = req.body;
+    const files = req.files;
 
     try {
         // Primero se verifica si existe
         const petExists = await Pet.findById(id);
         if(!petExists) {
+            if (files && files.length > 0) {
+                files.forEach(file => deleteFile(file.path));
+            }
             return res.status(404).json({msg: 'ERROR: La mascota que desea editar no existe.'});
         }
 
-        // Validación para solo lo que se quiere actualizar
+        // Eliminar imagenes antiguas si se suben nuevas
+        if (files && files.length > 0) {
+            if (petExists.images && petExists.images.length > 0) {
+                petExists.images.forEach(imgPath => deleteFile(imgPath));
+            }
+            pet.images = files.map(file => file.path);
+        }
+
         validatePet(pet, true);
 
         const newPet = await Pet.findByIdAndUpdate(id, pet, {new: true});
-        res.json( {msg: 'La mascota fue actualizada con éxito.', data : newPet} );
+        return res.json( {msg: 'La mascota fue actualizada con éxito.', data : newPet} );
 
     } catch (error) {
-        res.status(400).json({msg: error.message});
+        if (files && files.length > 0) {
+            files.forEach(file => deleteFile(file.path));
+        }
+        return res.status(400).json({msg: error.message});
     }
 
 };

@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 
 // Validaciones
 const validateRefuge = (data, isUpdate = false) => {
+
     const phoneRegex = /^\+?\d{7,15}$/;
 
     if (!isUpdate && !data.userId) {
@@ -16,11 +17,7 @@ const validateRefuge = (data, isUpdate = false) => {
     }
 
     if (!isUpdate || data.phone !== undefined) {
-        if (
-            typeof data.phone !== "string" ||
-            data.phone.trim() === "" ||
-            !phoneRegex.test(data.phone)
-        ) {
+        if ( typeof data.phone !== "string" || data.phone.trim() === "" || !phoneRegex.test(data.phone) ) {
             throw new Error("El teléfono debe tener entre 7 y 15 dígitos y puede comenzar con '+'.");
         }
     }
