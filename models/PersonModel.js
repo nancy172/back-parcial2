@@ -15,10 +15,6 @@ const personSchema = new Schema({
         type: String,
         required: true
     },
-    dni: {
-        type: String,
-        required: true
-    },
     phone: {
         type: String,
         required: true

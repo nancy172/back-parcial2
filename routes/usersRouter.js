@@ -17,16 +17,28 @@ const storage = multer.diskStorage({
     } 
 });
 
-const upload = multer({ storage:storage });
+const fileFilter = (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    if (!allowedTypes.includes(file.mimetype)) {
+        return cb(new Error('Tipo de archivo no permitido'), false);
+    }
+    cb(null, true);
+};
+
+const upload = multer({
+    storage,
+    fileFilter,
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB
+});
 
 // Rutas para usuarios
-router.get('/', getUsers);
+router.get('/', validateToken, getUsers);
 router.get('/:id', validateToken, getUserById);
-router.post('/', addUser);
+router.post('/', upload.single('file'), addUser);
 router.post('/auth', auth);
 router.delete('/:id', validateToken, deleteUser);
-router.put('/:id', upload.single('foto'), updateUser);
+router.put('/:id', validateToken, upload.single('file'), updateUser);
 
-router.post('/upload', upload.single('foto'), uploadController);
+router.post('/upload', upload.single('file'), uploadController);
 
 export default router;

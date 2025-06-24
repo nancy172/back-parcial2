@@ -24,6 +24,7 @@ db.once( 'open', () => {console.log("Conexión con la base de datos.")});
 app.use(express.json());
 app.use(express.static('public'));
 app.use(cors());
+app.use('/uploads', express.static('uploads'));
 
 // Se llaman a las rutas
 routerApi(app);
