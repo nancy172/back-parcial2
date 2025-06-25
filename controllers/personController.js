@@ -62,10 +62,10 @@ const validatePerson = (data, isUpdate = false) => {
 // Controladores
 const getPersons = async (req, res) => {
     try {
-        const persons = await Person.find().populate('userId', 'email username role');
+        const persons = await Person.find().populate('userId', 'username email role');
         res.status(200).json(persons);
     } catch (error) {
-        res.status(500).json({ msg: "ERROR: No se pudo obtener la lista de personas." });
+        res.status(500).json({ msg: "ERROR: No se pudo obtener la lista de personas.", error: error.message });
     }
 };
 
@@ -77,7 +77,7 @@ const getPersonById = async (req, res) => {
     }
 
     try {
-        const person = await Person.findById(id).populate('userId', 'email username role');
+        const person = await Person.findById(id).populate('userId', 'username email role');
         if (!person) {
             return res.status(404).json({ msg: "ERROR: No se encontró la persona." });
         }

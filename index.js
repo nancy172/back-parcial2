@@ -19,7 +19,6 @@ db.on( 'error', () => {console.error({error})});
 
 db.once( 'open', () => {console.log("Conexión con la base de datos.")});
 
-
 // Middlewares
 app.use(express.json());
 app.use(express.static('public'));

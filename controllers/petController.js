@@ -123,6 +123,15 @@ const addPet = async (req, res) => {
     const files = req.files;
 
     try {
+        // Parsear age si viene como string JSON
+        if (typeof pet.age === 'string') {
+            try {
+                pet.age = JSON.parse(pet.age);
+            } catch {
+                throw new Error("ERROR: El campo edad no tiene formato JSON válido.");
+            }
+        }
+        
         // Guardar rutas de imágenes subidas si hay
         if (files && files.length > 0) {
             pet.images = files.map(file => file.path);
@@ -180,6 +189,15 @@ const updatePet = async (req, res) => {
                 files.forEach(file => deleteFile(file.path));
             }
             return res.status(404).json({msg: 'ERROR: La mascota que desea editar no existe.'});
+        }
+
+        // Parsear age si viene como string JSON
+        if (typeof pet.age === 'string') {
+            try {
+                pet.age = JSON.parse(pet.age);
+            } catch {
+                throw new Error("ERROR: El campo edad no tiene formato JSON válido.");
+            }
         }
 
         // Eliminar imagenes antiguas si se suben nuevas
