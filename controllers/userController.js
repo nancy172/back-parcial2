@@ -10,7 +10,7 @@ const secret_key = process.env.SECRET_KEY;
 const salt = 10;
 
 // Autenticación
-const auth = async (req, res) => {
+const login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
@@ -289,4 +289,4 @@ const updateUser = async (req, res) => {
 
 };
 
-export {getUsers, getUserById, addUser, deleteUser, updateUser, auth};
+export {getUsers, getUserById, addUser, deleteUser, updateUser, login};
