@@ -4,8 +4,8 @@ import {getRefuges, getRefugeById, addRefuge, updateRefuge, deleteRefuge} from "
 
 const router = express.Router();
 
-router.get("/", getRefuges);
-router.get("/:id", getRefugeById);
+router.get("/", validateToken, getRefuges);
+router.get("/:id", validateToken, getRefugeById);
 router.post("/", addRefuge);
 router.put("/:id", validateToken, updateRefuge);
 router.delete("/:id", validateToken, deleteRefuge);

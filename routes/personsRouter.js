@@ -4,9 +4,9 @@ import {getPersons, getPersonById, addPerson, updatePerson, deletePerson} from "
 
 const router = express.Router();
 
-router.get("/", getPersons);
-router.get("/:id", getPersonById);
-router.post("/", validateToken, addPerson);
+router.get("/", validateToken, getPersons);
+router.get("/:id", validateToken, getPersonById);
+router.post("/", addPerson);
 router.put("/:id", validateToken, updatePerson);
 router.delete("/:id", validateToken, deletePerson);
 
